@@ -113,3 +113,179 @@ movements.forEach(function (mov,i,arr)
 //the at method works both on array and string
 
 // console.log(arr.at(-1))
+
+const displayMovents=function (movements,sort=false) {
+
+  containerMovements.innerHTML='';
+  const movs=sort?movements.slice().sort((a,b)=>a-b):movements;
+  movs.forEach(function (mov,i) {
+    const type=mov > 0?'deposit':'withdrawal';
+  
+  const html=`
+  <div class="movements__row">
+          <div class="movements__type movements__type--${type}">${i +1}${type}</div>
+          <div class="movements__value">${mov}</div>
+        </div>`
+ 
+
+containerMovements.insertAdjacentHTML('afterbegin',html)
+});     
+};
+
+const calcDisplaySummary = function (acc) {
+  const incomes = acc.movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumIn.textContent = `${incomes}€`;
+
+  const out = acc.movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.textContent = `${Math.abs(out)}€`;
+
+  const interest = acc.movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * acc.interestRate) / 100)
+    .filter((int, i, arr) => {
+      // console.log(arr);
+      return int >= 1;
+    })
+    .reduce((acc, int) => acc + int, 0);
+  labelSumInterest.textContent = `${interest}€`;
+};
+//display the balance
+const calanddisplaybalance=function (acc){
+  acc.balance=acc.movements.reduce((acc,mov)=>acc +mov,0)
+  labelBalance.textContent=`${acc.balance} EUR`
+  }
+
+
+//return the of the depoists
+const max=movements.reduce((acc,mov)=> acc >mov?acc:mov,movements[0]);
+console.log(max)
+
+
+///////////////////////////////////////////////////////
+//generate user names from owners data
+
+const createusername=function (accs){
+  accs.forEach(function(acc){
+    acc.username=acc.owner
+    .toLowerCase()
+    .split(' ')
+    .map(name=>name[0])
+    .join('')
+  })
+}
+const updateui=function(accs){
+  displayMovents(accs.movements)
+
+
+  //dsiplay balance
+  calanddisplaybalance(accs)
+
+
+ //dispaly summary
+
+
+  calcDisplaySummary(accs)
+}
+createusername(accounts);
+console.log(accounts)
+let curacc;
+btnLogin.addEventListener('click',function(e){
+  e.preventDefault()
+  curacc=accounts.find(
+    acc=>acc.username===inputLoginUsername.value
+  );
+  console.log(curacc)
+  if(curacc?.pin===Number(inputLoginPin.value)){
+    labelWelcome.textContent=`welcome back,${curacc.owner.split(' ')[0]}`;
+    containerApp.style.opacity=100;
+    //clear the input feilds
+    inputLoginUsername.value=inputLoginPin.value='';
+    inputLoginPin.blur()
+  }
+  //dsiplay movs
+  updateui(curacc)
+})
+
+btnTransfer.addEventListener('click',function(e){
+  e.preventDefault();
+  const amount=Number(inputTransferAmount.value);
+  const receiverAcc=accounts.find(acc=>acc.username===inputTransferTo.value);
+  console.log(amount,receiverAcc)
+  inputTransferAmount.value=inputTransferTo.value='';
+  if(amount > 0 &&
+    receiverAcc&&
+    curacc.balance > amount&&
+    receiverAcc?.username!==curacc.username
+    ){
+      //do the transaction
+      curacc.movements.push(-amount)
+      receiverAcc.movements.push(amount)
+      updateui(curacc)
+    }
+})
+
+btnLoan.addEventListener('click',function(e){
+  e.preventDefault();
+  const amount=Number(inputLoanAmount.value)
+
+if(amount > 0 &&curacc.movements.some(mov=>mov >= amount *0.1)){
+  curacc.movements.push(amount);
+  updateui(curacc);
+  inputLoanAmount.value=''
+}
+});
+
+let sorted=false;
+btnSort.addEventListener('click',function(e){
+  e.preventDefault()
+  displayMovents(curacc.movements,!sorted);
+  sorted=!sorted;
+});
+//THE FILETR METHOD
+/*const despost=movements.filter(function(mov){
+  return mov>0
+})
+
+const depositfor=[];
+for(const mov of movements) if (mov >0)depositfor.push(mov)
+console.log(despost)
+console.log(depositfor)*/
+
+
+//the reduce mehtod
+// const balance=movements.reduce((acc,cur,i)=>acc +cur,0)
+// console.log(balance)
+
+
+//the find method doesn't return an arrya it only returns an element
+const accowener=accounts.find(acc => acc.owner===('Jessica Davis'))
+console.log(accowener);
+
+const someval=movements.every(mov=>mov > 150);
+console.log(someval)
+console.log(account4.movements.every(mov=> mov >49 ))
+
+//return < 0,a,b(keep order)
+//return >0,b,a(swithe order)
+
+//ascending 
+// movements.sort((a,b)=>{
+//   if(a>b) return 1;
+//   if(a<b) return -1;
+// });
+//we can refactor the above code to
+movements.sort((a,b)=>a -b);
+console.log(movements)
+//ace
+
+// movements.sort((a,b)=>{
+//   if(a>b) return -1;
+//   if(a<b) return 1;
+// 
+movements.sort((a,b)=>b-a);
+console.log(movements)
+//dec
